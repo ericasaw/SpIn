@@ -1,23 +1,37 @@
+from matplotlib import lines
 import numpy as np
 from astropy import units as u
 from astropy.modeling import models, fitting
 import matplotlib.pyplot as plt
 from pyparsing import line
 from specutils import Spectrum1D, SpectralRegion
+from specutils.fitting import find_lines_derivative
 from specutils.manipulation import extract_region
 from astropy.nddata import StdDevUncertainty
+import warnings
+
 
 class Spectra():
 
     def __init__(self, wavelength, flux, error = False):
         
         '''
+        Initilizes the spectra class
+        INPUT: 
+            wavelength has to be dimensionless and have values in angstroms
+            flux also has to be dimensionless
+            error assumes standard deviation uncertainty, defaults to No error
         
+        Creates a Spectra object
         '''
         #self.wavelength = wavelength
         #self.flux = flux
         self.voigt_params = None
         self.sub_spectrum = None
+        #In order to find lines, NaN values can't exist
+        nan_vals=np.isnan(flux)
+        flux=flux[~nan_vals]
+        wavelength=wavelength[~nan_vals]
 
         if error:
             spec_error = StdDevUncertainty(error)
@@ -39,6 +53,10 @@ class Spectra():
     def Fitting(self, line_wavelength, window):
         '''
         Function to fit a Voigt profile to line center provided and window region
+
+        INPUT:
+            line_wavelength has to have units of Angstroms
+            window also has units of Angstroms
         '''
         #check if wavelength is within spectral region 
         if line_wavelength.value > self.spectrum.wavelength.value.min() and line_wavelength.value < self.spectrum.wavelength.value.max():
@@ -57,5 +75,12 @@ class Spectra():
         else:
             print("Given wavelength is not within the spectral range.")
 
-        
+    def line_finding(self):
+        '''
+        Function to find extreme absorption or emission lines
+        '''
+        with warnings.catch_warnings():  # Ignore warnings
+            warnings.simplefilter('ignore')
+            lines = find_lines_derivative(self.spectrum, flux_threshold=0.75)
+        return lines
 
