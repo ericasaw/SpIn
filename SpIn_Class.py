@@ -2,6 +2,7 @@ import numpy as np
 from astropy import units as u
 from astropy.modeling import models, fitting
 import matplotlib.pyplot as plt
+from pyparsing import line
 from specutils import Spectrum1D, SpectralRegion
 from specutils.manipulation import extract_region
 from astropy.nddata import StdDevUncertainty
@@ -29,9 +30,9 @@ class Spectra():
             
     def plotting_spec(self):
 
-        fig, ax = plt.subplots(nrows = 1, ncols = 1, figsize = (5, 7), constrained_layout = True)
-        ax.plot(self.sub_spectrum.wavelength, self.sub_spectrum.flux, color = 'black')
-        ax.plot(self.sub_spectrum.wavelength, self.voigt_params(self.sub_spectrum.wavelength))
+        fig, ax = plt.subplots(nrows = 1, ncols = 1, figsize = (7, 5), constrained_layout = True)
+        ax.plot(self.sub_spectrum.wavelength, self.sub_spectrum.flux, color = 'black', alpha = 0.5)
+        ax.plot(self.sub_spectrum.wavelength, self.voigt_params(self.sub_spectrum.wavelength), color = 'blueviolet', lw = 4)
 
         return ax
 
@@ -39,19 +40,22 @@ class Spectra():
         '''
         Function to fit a Voigt profile to line center provided and window region
         '''
+        #check if wavelength is within spectral region 
+        if line_wavelength.value > self.spectrum.wavelength.value.min() and line_wavelength.value < self.spectrum.wavelength.value.max():
+            #Setting the sub region
+            sub_region = SpectralRegion(line_wavelength - window, line_wavelength + window)
         
-        #Setting the sub region
-        sub_region = SpectralRegion(line_wavelength - window, line_wavelength + window)
-        
-        #extracting the sub_region above
-        self.sub_spectrum = extract_region(self.spectrum, sub_region)
+            #extracting the sub_region above
+            self.sub_spectrum = extract_region(self.spectrum, sub_region)
 
-        voigt_model = models.Voigt1D(x_0 = line_wavelength)
-        voigt_fitter = fitting.LevMarLSQFitter()
+            voigt_model = models.Voigt1D(x_0 = line_wavelength, bounds = {'x_0': (line_wavelength.value - 0.5, line_wavelength.value + 0.5)})
+            voigt_fitter = fitting.LevMarLSQFitter()
 
-        self.voigt_params = voigt_fitter(model = voigt_model, 
+            self.voigt_params = voigt_fitter(model = voigt_model, 
                                          x = self.sub_spectrum.wavelength, 
                                          y = self.sub_spectrum.flux)
+        else:
+            print("Given wavelength is not within the spectral range.")
 
         
 
