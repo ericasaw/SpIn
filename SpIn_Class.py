@@ -9,7 +9,9 @@ from specutils.fitting import find_lines_derivative
 from specutils.manipulation import extract_region
 from astropy.nddata import StdDevUncertainty
 import warnings
-
+from scipy.signal import savgol_filter
+from scipy.signal import medfilt
+from astropy.stats import SigmaClip
 
 class Spectra():
 
@@ -84,3 +86,19 @@ class Spectra():
             lines = find_lines_derivative(self.spectrum, flux_threshold=0.75)
         return lines
 
+    def continuum_fit(self):
+
+        #smoothed_spectrum = savgol_filter(x = self.spectrum.flux.value, window_length=1301, polyorder = 3)
+        #medfilt_smoothed = medfilt(volume = self.spectrum.flux.value, kernel_size=151)
+        
+        sigclip = SigmaClip(sigma = 5)
+
+        mask = sigclip(data = self.spectrum.flux, masked = True)
+
+
+        
+        plt.plot(self.spectrum.wavelength, self.spectrum.flux, color = 'black', alpha = .7)
+        plt.plot(self.spectrum.wavelength[~mask.mask], self.spectrum.flux[~mask.mask], color = 'red', alpha = .7)
+        #plt.plot(self.spectrum.wavelength, smoothed_spectrum, color = 'red', alpha = .5)
+        #plt.plot(self.spectrum.wavelength, medfilt_smoothed, color = 'blue', alpha = .5)
+        plt.show()
