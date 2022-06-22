@@ -12,6 +12,6 @@ our_spec = Spectra(test_spec.wavelength.value, test_spec.normalize().flux.value 
 
 #plt.show()
 
-lines= our_spec.line_finding()
+lines= our_spec.line_fitting()
 print(lines)
 
