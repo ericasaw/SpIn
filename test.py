@@ -13,5 +13,5 @@ our_spec = Spectra(test_spec.wavelength.value, test_spec.normalize().flux.value 
 #plt.show()
 
 lines= our_spec.line_finding()
-print(lines['line_center'][0].value)
+print(lines)
 
