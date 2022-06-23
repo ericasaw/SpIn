@@ -91,14 +91,14 @@ class Spectra():
         #smoothed_spectrum = savgol_filter(x = self.spectrum.flux.value, window_length=1301, polyorder = 3)
         #medfilt_smoothed = medfilt(volume = self.spectrum.flux.value, kernel_size=151)
         
-        sigclip = SigmaClip(sigma = 5)
+        sigclip = SigmaClip(sigma = 1.5)
 
         mask = sigclip(data = self.spectrum.flux, masked = True)
 
-
+        smoothed_continuum = savgol_filter(x = self.spectrum.flux[~mask.mask], window_length=401, polyorder = 3)
         
         plt.plot(self.spectrum.wavelength, self.spectrum.flux, color = 'black', alpha = .7)
         plt.plot(self.spectrum.wavelength[~mask.mask], self.spectrum.flux[~mask.mask], color = 'red', alpha = .7)
-        #plt.plot(self.spectrum.wavelength, smoothed_spectrum, color = 'red', alpha = .5)
+        plt.plot(self.spectrum.wavelength[~mask.mask], smoothed_continuum, color = 'blue', alpha = .5)
         #plt.plot(self.spectrum.wavelength, medfilt_smoothed, color = 'blue', alpha = .5)
         plt.show()

@@ -5,7 +5,7 @@ from astropy import units as u
 from matplotlib.pylab import plt
 
 
-test_spec = IGRINSSpectrumList.read("SDCH_20201202_0059.spec_a0v.fits").trim_edges()[11]
+test_spec = IGRINSSpectrumList.read("SDCH_20201202_0059.spec_a0v.fits").trim_edges().stitch()
 
 our_spec = Spectra(test_spec.wavelength.value, test_spec.flux.value)
 #our_spec.Fitting(16493.3 * u.AA, 10 * u.AA)
