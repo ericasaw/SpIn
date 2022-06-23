@@ -3,7 +3,6 @@ import numpy as np
 from astropy import units as u
 from astropy.modeling import models, fitting
 import matplotlib.pyplot as plt
-from pyparsing import line
 from specutils import Spectrum1D, SpectralRegion
 from specutils.fitting import find_lines_derivative
 from specutils.manipulation import extract_region
@@ -14,18 +13,18 @@ from scipy.signal import medfilt
 from astropy.stats import SigmaClip
 
 class Spectra():
+    """Initializes the Spectra Class
+    """    
 
-    def __init__(self, wavelength, flux, error = False):
-        
-        '''
-        Initilizes the spectra class
-        INPUT: 
-            wavelength has to be dimensionless and have values in angstroms
-            flux also has to be dimensionless
-            error assumes standard deviation uncertainty, defaults to No error
-        
-        Creates a Spectra object
-        '''
+    def __init__(self, wavelength, flux, error = False):        
+        """Creates a Spectra object
+
+        Args:
+            wavelength (array):  Has to be dimensionless and have values in angstroms
+            flux (array): Has to be dimensionless
+            error (bool, optional): Assumes standard deviation uncertainty. Defaults to False.
+        """
+
         #self.wavelength = wavelength
         #self.flux = flux
         self.voigt_params = None
@@ -45,6 +44,11 @@ class Spectra():
                                        flux = flux * u.dimensionless_unscaled)
             
     def plotting_spec(self):
+        """Plotting function
+
+        Returns:
+            _type_: _description_
+        """        
 
         fig, ax = plt.subplots(nrows = 1, ncols = 1, figsize = (7, 5), constrained_layout = True)
         ax.plot(self.sub_spectrum.wavelength, self.sub_spectrum.flux, color = 'black', alpha = 0.5)
@@ -52,14 +56,14 @@ class Spectra():
 
         return ax
 
-    def Fitting(self, line_wavelength, window):
-        '''
-        Function to fit a Voigt profile to line center provided and window region
+    def Fitting(self, line_wavelength, window):        
+        """Function to fit a Voigt profile to line center provided and window region
 
-        INPUT:
-            line_wavelength has to have units of Angstroms
-            window also has units of Angstroms
-        '''
+        Args:
+            line_wavelength (float): Has to have units of Angstroms.
+            window (float): Has to have units of Angstroms.
+        """        
+
         #check if wavelength is within spectral region 
         if line_wavelength.value > self.spectrum.wavelength.value.min() and line_wavelength.value < self.spectrum.wavelength.value.max():
             #Setting the sub region
@@ -77,16 +81,23 @@ class Spectra():
         else:
             print("Given wavelength is not within the spectral range.")
 
-    def line_finding(self):
-        '''
-        Function to find extreme absorption or emission lines
-        '''
+    def line_finding(self):        
+        """Function to find extreme absorption or emission lines
+
+        Returns:
+            _type_: _description_
+        """        
+
         with warnings.catch_warnings():  # Ignore warnings
             warnings.simplefilter('ignore')
             lines = find_lines_derivative(self.spectrum, flux_threshold=0.75)
+
         return lines
 
     def continuum_fit(self):
+
+        """Fits the continuum
+        """       
 
         #smoothed_spectrum = savgol_filter(x = self.spectrum.flux.value, window_length=1301, polyorder = 3)
         #medfilt_smoothed = medfilt(volume = self.spectrum.flux.value, kernel_size=151)

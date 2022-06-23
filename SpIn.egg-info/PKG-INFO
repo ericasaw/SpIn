@@ -1,0 +1,13 @@
+Metadata-Version: 2.1
+Name: SpIn
+Version: 1.0.0
+Summary: A Python package for spectra information
+Home-page: https://github.com/ericasaw/SpIn
+Author: Camila Angulo, Oscar Chávez, Erica Sawczynec
+Author-email: spin@spin.com
+License: UNKNOWN
+Platform: UNKNOWN
+Requires-Python: >=3.8
+
+UNKNOWN
+

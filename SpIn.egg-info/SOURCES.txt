@@ -1,0 +1,6 @@
+README.md
+setup.py
+SpIn.egg-info/PKG-INFO
+SpIn.egg-info/SOURCES.txt
+SpIn.egg-info/dependency_links.txt
+SpIn.egg-info/top_level.txt
