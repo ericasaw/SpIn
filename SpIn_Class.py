@@ -79,7 +79,10 @@ class Spectra():
             sub_region = SpectralRegion(line_wavelength - window, line_wavelength + window)
         
             #extracting the sub_region above
-            self.sub_spectrum = extract_region(self.continuum_divide, sub_region)
+            if self.continuum_divide:
+                self.sub_spectrum = extract_region(self.continuum_divide, sub_region)
+            else:
+                self.sub_spectrum = extract_region(self.spectrum, sub_region)
 
             voigt_model = models.Voigt1D(x_0 = line_wavelength, bounds = {'x_0': (line_wavelength.value - limit_bound.value, line_wavelength.value + limit_bound.value)})
             voigt_fitter = fitting.LevMarLSQFitter()
@@ -136,8 +139,7 @@ class Spectra():
            
            Returns:
                fig (matplotlib fig object): a matplotlib  fig object that is defaulted to a figsize of (14, 5)
-               axes: A list of axes (axes[0], axes[1]) where axes[0] holds the spectrum and the continuum fit plot 
-               and axes[1] hold the continuum divided spectrum plot
+               axes: A list of axes (axes[0], axes[1]) where axes[0] holds the spectrum and the continuum fit plot and axes[1] hold the continuum divided spectrum plot
         """ 
         #makes a 1 row and 2 column fig, ax variables 
         fig, axes = plt.subplots(1, 2, figsize = (14,5), dpi = 100, facecolor = 'white')
