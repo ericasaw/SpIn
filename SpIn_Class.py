@@ -11,6 +11,7 @@ import warnings
 from scipy.signal import savgol_filter
 from scipy.signal import medfilt
 from astropy.stats import SigmaClip
+from scipy import interpolate
 
 class Spectra():
     """Initializes the Spectra Class
@@ -29,6 +30,7 @@ class Spectra():
         #self.flux = flux
         self.voigt_params = None
         self.sub_spectrum = None
+        self.continuum_divide = None
         #In order to find lines, NaN values can't exist
         nan_vals=np.isnan(flux)
         flux=flux[~nan_vals]
@@ -50,13 +52,15 @@ class Spectra():
             _type_: _description_
         """        
 
-        fig, ax = plt.subplots(nrows = 1, ncols = 1, figsize = (7, 5), constrained_layout = True)
-        ax.plot(self.sub_spectrum.wavelength, self.sub_spectrum.flux, color = 'black', alpha = 0.5)
-        ax.plot(self.sub_spectrum.wavelength, self.voigt_params(self.sub_spectrum.wavelength), color = 'blueviolet', lw = 4)
+        fig, ax = plt.subplots(nrows = 1, ncols = 1, figsize = (7, 5), constrained_layout = True, facecolor = 'white')
+        ax.plot(self.sub_spectrum.wavelength, self.sub_spectrum.flux, color = 'black')
+        ax.plot(self.sub_spectrum.wavelength, self.voigt_params(self.sub_spectrum.wavelength), color = 'blueviolet', lw = 3)
+        ax.set_xlabel('Wavelength')
+        ax.set_ylabel('Flux')
 
         return ax
 
-    def Fitting(self, line_wavelength, window):        
+    def Fitting(self, line_wavelength, window, limit_bound = 10 * u.AA):        
         """Function to fit a Voigt profile to line center provided and window region
 
         Args:
@@ -70,9 +74,9 @@ class Spectra():
             sub_region = SpectralRegion(line_wavelength - window, line_wavelength + window)
         
             #extracting the sub_region above
-            self.sub_spectrum = extract_region(self.spectrum, sub_region)
+            self.sub_spectrum = extract_region(self.continuum_divide, sub_region)
 
-            voigt_model = models.Voigt1D(x_0 = line_wavelength, bounds = {'x_0': (line_wavelength.value - 0.5, line_wavelength.value + 0.5)})
+            voigt_model = models.Voigt1D(x_0 = line_wavelength, bounds = {'x_0': (line_wavelength.value - limit_bound.value, line_wavelength.value + limit_bound.value)})
             voigt_fitter = fitting.LevMarLSQFitter()
 
             self.voigt_params = voigt_fitter(model = voigt_model, 
@@ -81,7 +85,7 @@ class Spectra():
         else:
             print("Given wavelength is not within the spectral range.")
 
-    def line_finding(self):        
+    def line_finding(self, threshold, continuum = True):        
         """Function to find extreme absorption or emission lines
 
         Returns:
@@ -90,26 +94,43 @@ class Spectra():
 
         with warnings.catch_warnings():  # Ignore warnings
             warnings.simplefilter('ignore')
-            lines = find_lines_derivative(self.spectrum, flux_threshold=0.75)
+            if continuum:
+                lines = find_lines_derivative(self.continuum_divide, threshold)
+            else:
+                lines = find_lines_derivative(self.spectrum, threshold)
 
         return lines
 
-    def continuum_fit(self):
+    def continuum_fit(self, plot = True):
 
         """Fits the continuum
         """       
 
-        #smoothed_spectrum = savgol_filter(x = self.spectrum.flux.value, window_length=1301, polyorder = 3)
-        #medfilt_smoothed = medfilt(volume = self.spectrum.flux.value, kernel_size=151)
-        
         sigclip = SigmaClip(sigma = 1.5)
 
         mask = sigclip(data = self.spectrum.flux, masked = True)
 
-        smoothed_continuum = savgol_filter(x = self.spectrum.flux[~mask.mask], window_length=401, polyorder = 3)
+        smoothed_spectrum = savgol_filter(x = self.spectrum.flux[~mask.mask], window_length = 401, polyorder = 3)
         
-        plt.plot(self.spectrum.wavelength, self.spectrum.flux, color = 'black', alpha = .7)
-        plt.plot(self.spectrum.wavelength[~mask.mask], self.spectrum.flux[~mask.mask], color = 'red', alpha = .7)
-        plt.plot(self.spectrum.wavelength[~mask.mask], smoothed_continuum, color = 'blue', alpha = .5)
-        #plt.plot(self.spectrum.wavelength, medfilt_smoothed, color = 'blue', alpha = .5)
-        plt.show()
+        f = interpolate.interp1d(self.spectrum.wavelength[~mask.mask], smoothed_spectrum, fill_value='extrapolate')
+        
+        flux_divide = (self.spectrum.flux / f(self.spectrum.wavelength)) - 1
+        
+        self.continuum_divide = Spectrum1D(spectral_axis= self.spectrum.wavelength, flux = flux_divide)
+        
+        if plot:
+            fig, axes = plt.subplots(1, 2, figsize = (14,5), dpi = 100, facecolor = 'white')
+            axes[0].plot(self.spectrum.wavelength, self.spectrum.flux, color = 'black')
+            axes[0].plot(self.spectrum.wavelength[~mask.mask], self.spectrum.flux[~mask.mask], color = 'red', alpha = .7, label = 'sigma clip')
+            axes[0].plot(self.spectrum.wavelength, f(self.spectrum.wavelength), color = 'blue', label = 'continuum guess')
+            axes[0].legend()
+            axes[0].set_title('Original Spec')
+            axes[0].set_ylabel('Flux')
+            axes[0].set_xlabel('Wavelength')
+        
+            axes[1].plot(self.continuum_divide.wavelength, self.continuum_divide.flux, color = 'k')
+            axes[1].set_title('Continuum Divided')
+            axes[1].set_ylabel('Flux')
+            axes[1].set_xlabel('Wavelength')
+        
+            plt.show()
