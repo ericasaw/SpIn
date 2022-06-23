@@ -18,6 +18,8 @@
 </p>
 
 <p align = "center">
-    <img src = "/images/LAE_Full_Spec.png" alt="An example LAE from HETDEX.">
+    <img src = "/images/LAE_Full_Spec.png" alt="An example LAE from HETDEX."> <br>
+    An example Lyman Alpha Emitter (LAE) from the HETDEX survey. <br>
     <img src = "/images/Found_Lya.png" alt="Fit Lya with Voigt profile using SpIn!.">
+    Fitting the Lyman Alpha line using Spin!
 </p>
