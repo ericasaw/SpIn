@@ -22,7 +22,8 @@ class Spectra():
             off of wavelength (array) and flux (array). Error (optional) defaults to False.
             sub_spectrum (specutils.Spectrum1D): A zoomed-in region cutout of spectrum based on window size.
             continuum_divide (specutils.Spectrum1D): A continuum-divided spectrum.
-
+            f: the interpolated continuum function
+            mask: This is the boolean mask that masks the values that got sigma clipped
     """    
 
     def __init__(self, wavelength, flux, error = False):        
@@ -32,6 +33,8 @@ class Spectra():
         self.voigt_params = None
         self.sub_spectrum = None
         self.continuum_divide = None
+        self.f = None 
+        self.mask = None 
         #In order to find lines, NaN values can't exist
         nan_vals=np.isnan(flux)
         flux=flux[~nan_vals]
@@ -108,38 +111,50 @@ class Spectra():
 
         return lines
 
-    def continuum_fit(self, plot = True):
-        """Fits the continuum and plots it.
+    def continuum_fit(self, window = 11):
+        """Fits the continuum
 
         Args:
-            plot (bool, optional): Plots the spectrum and the continuum fit. Defaults to True.
+            window (int): A user defined odd integer that defines the window length to perform the smoothing of the spectrum
+        
         """        
 
         sigclip = SigmaClip(sigma = 1.5)
 
-        mask = sigclip(data = self.spectrum.flux, masked = True)
+        self.mask = sigclip(data = self.spectrum.flux, masked = True)
 
-        smoothed_spectrum = savgol_filter(x = self.spectrum.flux[~mask.mask], window_length = 401, polyorder = 3)
+        smoothed_spectrum = savgol_filter(x = self.spectrum.flux[~self.mask.mask], window_length = window, polyorder = 3)
         
-        f = interpolate.interp1d(self.spectrum.wavelength[~mask.mask], smoothed_spectrum, fill_value='extrapolate')
+        self.f = interpolate.interp1d(self.spectrum.wavelength[~self.mask.mask], smoothed_spectrum, fill_value='extrapolate')
         
-        flux_divide = (self.spectrum.flux / f(self.spectrum.wavelength)) - 1
+        flux_divide = (self.spectrum.flux / self.f(self.spectrum.wavelength)) - 1
         
         self.continuum_divide = Spectrum1D(spectral_axis= self.spectrum.wavelength, flux = flux_divide)
+
+    def plotting_continuum(self):    
+        """Plots a side by side comparison of the original spectrum with the continuum
+           
+           Returns:
+               fig (matplotlib fig object): a matplotlib  fig object that is defaulted to a figsize of (14, 5)
+               axes: A list of axes (axes[0], axes[1]) where axes[0] holds the spectrum and the continuum fit plot 
+               and axes[1] hold the continuum divided spectrum plot
+        """ 
+        #makes a 1 row and 2 column fig, ax variables 
+        fig, axes = plt.subplots(1, 2, figsize = (14,5), dpi = 100, facecolor = 'white')
         
-        if plot:
-            fig, axes = plt.subplots(1, 2, figsize = (14,5), dpi = 100, facecolor = 'white')
-            axes[0].plot(self.spectrum.wavelength, self.spectrum.flux, color = 'black')
-            axes[0].plot(self.spectrum.wavelength[~mask.mask], self.spectrum.flux[~mask.mask], color = 'red', alpha = .7, label = 'sigma clip')
-            axes[0].plot(self.spectrum.wavelength, f(self.spectrum.wavelength), color = 'blue', label = 'continuum guess')
-            axes[0].legend()
-            axes[0].set_title('Original Spec')
-            axes[0].set_ylabel('Flux')
-            axes[0].set_xlabel('Wavelength')
-        
-            axes[1].plot(self.continuum_divide.wavelength, self.continuum_divide.flux, color = 'k')
-            axes[1].set_title('Continuum Divided')
-            axes[1].set_ylabel('Flux')
-            axes[1].set_xlabel('Wavelength')
-        
-            plt.show()
+        #plotting the spectrum, masked_spectrum and continuum
+        axes[0].plot(self.spectrum.wavelength, self.spectrum.flux, color = 'black')
+        axes[0].plot(self.spectrum.wavelength[~self.mask.mask], self.spectrum.flux[~self.mask.mask], color = 'red', alpha = .7, label = 'sigma clip')
+        axes[0].plot(self.spectrum.wavelength, self.f(self.spectrum.wavelength), color = 'blue', label = 'continuum guess')
+        axes[0].legend()
+        axes[0].set_title('Original Spec')
+        axes[0].set_ylabel('Flux')
+        axes[0].set_xlabel('Wavelength')
+    
+        #plotting the continuum divided spectrum
+        axes[1].plot(self.continuum_divide.wavelength, self.continuum_divide.flux, color = 'k')
+        axes[1].set_title('Continuum Divided')
+        axes[1].set_ylabel('Flux')
+        axes[1].set_xlabel('Wavelength')
+
+        return fig, axes
