@@ -16,3 +16,8 @@
     <img src="/images/voigt_fit_example.png" alt="An example Voigt profile line fit with SpIn"/> <br>
     An example absoprtion line profile fit within the above order.
 </p>
+
+<p align = "center">
+    <img src = "/images/LAE_Full_Spec.png" alt="An example LAE from HETDEX.">
+    <img src = "/images/Found_Lya.png" alt="Fit Lya with Voigt profile using SpIn!.">
+</p>
