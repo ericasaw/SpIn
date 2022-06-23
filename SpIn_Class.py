@@ -15,16 +15,17 @@ from scipy import interpolate
 
 class Spectra():
     """Initializes the Spectra Class
+
+        Attributes:
+            voight_params (function): Function of the best fit profile of the sub_spectrum.
+            spectrum (specutils.Spectrum1D): specutils inherited class. Build a Spectrum1D object based 
+            off of wavelength (array) and flux (array). Error (optional) defaults to False.
+            sub_spectrum (specutils.Spectrum1D): A zoomed-in region cutout of spectrum based on window size.
+            continuum_divide (specutils.Spectrum1D): A continuum-divided spectrum.
+
     """    
 
     def __init__(self, wavelength, flux, error = False):        
-        """Creates a Spectra object
-
-        Args:
-            wavelength (array):  Has to be dimensionless and have values in angstroms
-            flux (array): Has to be dimensionless
-            error (bool, optional): Assumes standard deviation uncertainty. Defaults to False.
-        """
 
         #self.wavelength = wavelength
         #self.flux = flux
@@ -49,7 +50,7 @@ class Spectra():
         """Plotting function
 
         Returns:
-            _type_: _description_
+            axes.Axes object: Plots the sub_spectrum and the best fit Voight profile. 
         """        
 
         fig, ax = plt.subplots(nrows = 1, ncols = 1, figsize = (7, 5), constrained_layout = True, facecolor = 'white')
@@ -60,13 +61,14 @@ class Spectra():
 
         return ax
 
-    def Fitting(self, line_wavelength, window, limit_bound = 10 * u.AA):        
+    def Fitting(self, line_wavelength, window, limit_bound = 10 * u.AA):
         """Function to fit a Voigt profile to line center provided and window region
 
         Args:
             line_wavelength (float): Has to have units of Angstroms.
             window (float): Has to have units of Angstroms.
-        """        
+            limit_bound (float, optional): Changes line center bounds to fit within a narrower region. Defaults to 10*u.AA.
+        """                
 
         #check if wavelength is within spectral region 
         if line_wavelength.value > self.spectrum.wavelength.value.min() and line_wavelength.value < self.spectrum.wavelength.value.max():
@@ -85,12 +87,17 @@ class Spectra():
         else:
             print("Given wavelength is not within the spectral range.")
 
-    def line_finding(self, threshold, continuum = True):        
-        """Function to find extreme absorption or emission lines
+    def line_finding(self, threshold, continuum = True):
+        """Function to find extreme absorption or emission lines.
+
+        Args:
+            threshold (float): The treshold a flux value must be above or below to be considered an emission or absorption feature.
+            continuum (bool, optional): Set to False if you didn't use the continuum_fit function on the spectra. Defaults to True.
 
         Returns:
-            _type_: _description_
-        """        
+            lines (QTable): Table of emission and absorption lines. Column headers: Line center (line_center), line type (line_type) and 
+            index of line center (line_center_index) are stored for each line.
+        """                        
 
         with warnings.catch_warnings():  # Ignore warnings
             warnings.simplefilter('ignore')
@@ -102,9 +109,11 @@ class Spectra():
         return lines
 
     def continuum_fit(self, plot = True):
+        """Fits the continuum and plots it.
 
-        """Fits the continuum
-        """       
+        Args:
+            plot (bool, optional): Plots the spectrum and the continuum fit. Defaults to True.
+        """        
 
         sigclip = SigmaClip(sigma = 1.5)
 

@@ -72,15 +72,70 @@
 <dt class="sig sig-object py" id="SpIn_Class.Spectra">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">SpIn_Class.</span></span><span class="sig-name descname"><span class="pre">Spectra</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wavelength</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flux</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#SpIn_Class.Spectra" title="Permalink to this definition"></a></dt>
 <dd><p>Initializes the Spectra Class</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="SpIn_Class.Spectra.voight_params">
+<span class="sig-name descname"><span class="pre">voight_params</span></span><a class="headerlink" href="#SpIn_Class.Spectra.voight_params" title="Permalink to this definition"></a></dt>
+<dd><p>Function of the best fit profile of the sub_spectrum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>function</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="SpIn_Class.Spectra.spectrum">
+<span class="sig-name descname"><span class="pre">spectrum</span></span><a class="headerlink" href="#SpIn_Class.Spectra.spectrum" title="Permalink to this definition"></a></dt>
+<dd><p>specutils inherited class. Build a Spectrum1D object based</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>specutils.Spectrum1D</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">off</span> <span class="pre">of</span> <span class="pre">wavelength</span></span></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>array) and flux (array) Error (optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="SpIn_Class.Spectra.sub_spectrum">
+<span class="sig-name descname"><span class="pre">sub_spectrum</span></span><a class="headerlink" href="#SpIn_Class.Spectra.sub_spectrum" title="Permalink to this definition"></a></dt>
+<dd><p>A zoomed-in region cutout of spectrum based on window size.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>specutils.Spectrum1D</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="SpIn_Class.Spectra.continuum_divide">
+<span class="sig-name descname"><span class="pre">continuum_divide</span></span><a class="headerlink" href="#SpIn_Class.Spectra.continuum_divide" title="Permalink to this definition"></a></dt>
+<dd><p>A continuum-divided spectrum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>specutils.Spectrum1D</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="SpIn_Class.Spectra.Fitting">
-<span class="sig-name descname"><span class="pre">Fitting</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">line_wavelength</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#SpIn_Class.Spectra.Fitting" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">Fitting</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">line_wavelength</span></em>, <em class="sig-param"><span class="pre">window</span></em>, <em class="sig-param"><span class="pre">limit_bound=&lt;Quantity</span> <span class="pre">10.</span> <span class="pre">Angstrom&gt;</span></em><span class="sig-paren">)</span><a class="headerlink" href="#SpIn_Class.Spectra.Fitting" title="Permalink to this definition"></a></dt>
 <dd><p>Function to fit a Voigt profile to line center provided and window region</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>line_wavelength</strong> (<em>float</em>) – Has to have units of Angstroms.</p></li>
 <li><p><strong>window</strong> (<em>float</em>) – Has to have units of Angstroms.</p></li>
+<li><p><strong>limit_bound</strong> (<em>float</em><em>, </em><em>optional</em>) – Changes line center bounds to fit within a narrower region. Defaults to 10*u.AA.</p></li>
 </ul>
 </dd>
 </dl>
@@ -88,20 +143,32 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="SpIn_Class.Spectra.continuum_fit">
-<span class="sig-name descname"><span class="pre">continuum_fit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#SpIn_Class.Spectra.continuum_fit" title="Permalink to this definition"></a></dt>
-<dd><p>Fits the continuum</p>
+<span class="sig-name descname"><span class="pre">continuum_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#SpIn_Class.Spectra.continuum_fit" title="Permalink to this definition"></a></dt>
+<dd><p>Fits the continuum and plots it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>plot</strong> (<em>bool</em><em>, </em><em>optional</em>) – Plots the spectrum and the continuum fit. Defaults to True.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="SpIn_Class.Spectra.line_finding">
-<span class="sig-name descname"><span class="pre">line_finding</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#SpIn_Class.Spectra.line_finding" title="Permalink to this definition"></a></dt>
-<dd><p>Function to find extreme absorption or emission lines</p>
+<span class="sig-name descname"><span class="pre">line_finding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">continuum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#SpIn_Class.Spectra.line_finding" title="Permalink to this definition"></a></dt>
+<dd><p>Function to find extreme absorption or emission lines.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>_description_</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>threshold</strong> (<em>float</em>) – The treshold a flux value must be above or below to be considered an emission or absorption feature.</p></li>
+<li><p><strong>continuum</strong> (<em>bool</em><em>, </em><em>optional</em>) – Set to False if you didn’t use the continuum_fit function on the spectra. Defaults to True.</p></li>
+</ul>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>_type_</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Table of emission and absorption lines. Column headers: Line center (line_center), line type (line_type) and
+index of line center (line_center_index) are stored for each line.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>lines (QTable)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -112,10 +179,10 @@
 <dd><p>Plotting function</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>_description_</p>
+<dd class="field-odd"><p>Plots the sub_spectrum and the best fit Voight profile.</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>_type_</p>
+<dd class="field-even"><p>ax object</p>
 </dd>
 </dl>
 </dd></dl>
