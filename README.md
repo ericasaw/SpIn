@@ -13,6 +13,6 @@
 
 
 <p align = "center">
-    <img src="/images/voigt_fit_example.png" alt="An example Voigt profile line fit with SpIn"/> \
+    <img src="/images/voigt_fit_example.png" alt="An example Voigt profile line fit with SpIn"/> <br>
     An example absoprtion line profile fit within the above order.
 </p>
